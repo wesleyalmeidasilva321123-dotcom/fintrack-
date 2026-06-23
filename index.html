@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FinTrack — Controle Financeiro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@300;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <span class="logo-icon">◈</span>
+      <span class="logo-text">FinTrack</span>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-btn active" data-tab="dashboard">
+        <span class="nav-icon">▣</span> Dashboard
+      </button>
+      <button class="nav-btn" data-tab="despesas">
+        <span class="nav-icon">↓</span> Despesas
+      </button>
+      <button class="nav-btn" data-tab="relatorio">
+        <span class="nav-icon">◎</span> Relatório
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-reset" id="btnReset">↺ Resetar dados</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HEADER -->
+    <header class="topbar">
+      <div>
+        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+        <p class="page-sub" id="pageSub">Visão geral das suas finanças</p>
+      </div>
+      <div class="month-selector">
+        <button class="month-btn" id="prevMonth">‹</button>
+        <span id="currentMonthLabel">—</span>
+        <button class="month-btn" id="nextMonth">›</button>
+      </div>
+    </header>
+
+    <!-- TAB: DASHBOARD -->
+    <section class="tab-content active" id="tab-dashboard">
+
+      <!-- RENDA INPUT -->
+      <div class="income-bar">
+        <label class="income-label">Renda mensal</label>
+        <div class="income-input-wrap">
+          <span class="currency-prefix">R$</span>
+          <input type="number" id="incomeInput" class="income-input" placeholder="0,00" min="0" step="0.01" />
+        </div>
+        <button class="btn-primary" id="btnSaveIncome">Salvar</button>
+      </div>
+
+      <!-- KPI CARDS -->
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-income">
+          <p class="kpi-label">Renda</p>
+          <p class="kpi-value" id="kpiIncome">R$ 0,00</p>
+          <p class="kpi-sub">este mês</p>
+        </div>
+        <div class="kpi-card kpi-expense">
+          <p class="kpi-label">Despesas</p>
+          <p class="kpi-value" id="kpiExpense">R$ 0,00</p>
+          <p class="kpi-sub">este mês</p>
+        </div>
+        <div class="kpi-card kpi-balance">
+          <p class="kpi-label">Saldo</p>
+          <p class="kpi-value" id="kpiBalance">R$ 0,00</p>
+          <p class="kpi-sub">disponível</p>
+        </div>
+        <div class="kpi-card kpi-save">
+          <p class="kpi-label">Taxa de Economia</p>
+          <p class="kpi-value" id="kpiSaveRate">0%</p>
+          <p class="kpi-sub">da renda</p>
+        </div>
+      </div>
+
+      <!-- SAVINGS PROGRESS -->
+      <div class="savings-block">
+        <div class="savings-header">
+          <span class="savings-title">Meta de economia</span>
+          <div class="savings-goal-wrap">
+            <span class="savings-label">Meta:</span>
+            <input type="number" id="goalInput" class="goal-input" placeholder="20" min="0" max="100" />
+            <span>%</span>
+          </div>
+        </div>
+        <div class="progress-track">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <p class="progress-caption" id="progressCaption">Defina sua renda e meta para começar.</p>
+      </div>
+
+      <!-- CHARTS ROW -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <p class="chart-title">Despesas por categoria</p>
+          <div class="chart-wrap">
+            <canvas id="donutChart"></canvas>
+            <div class="donut-center" id="donutCenter">
+              <span class="donut-total-label">Total</span>
+              <span class="donut-total-value" id="donutTotal">R$ 0</span>
+            </div>
+          </div>
+        </div>
+        <div class="chart-card chart-card--wide">
+          <p class="chart-title">Evolução mensal</p>
+          <canvas id="lineChart" height="200"></canvas>
+        </div>
+      </div>
+
+      <!-- RECENT EXPENSES -->
+      <div class="recent-block">
+        <div class="recent-header">
+          <p class="chart-title">Últimas despesas</p>
+          <button class="btn-link" data-tab="despesas" id="btnGoToDespesas">Ver todas →</button>
+        </div>
+        <ul class="expense-list" id="recentList">
+          <li class="empty-state">Nenhuma despesa registrada ainda.</li>
+        </ul>
+      </div>
+
+    </section>
+
+    <!-- TAB: DESPESAS -->
+    <section class="tab-content" id="tab-despesas">
+
+      <div class="form-card">
+        <h2 class="form-title">Nova despesa</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label>Descrição</label>
+            <input type="text" id="expDesc" placeholder="Ex: Aluguel, Mercado..." />
+          </div>
+          <div class="field">
+            <label>Valor (R$)</label>
+            <input type="number" id="expValue" placeholder="0,00" min="0" step="0.01" />
+          </div>
+          <div class="field">
+            <label>Categoria</label>
+            <select id="expCategory">
+              <option value="Moradia">🏠 Moradia</option>
+              <option value="Alimentação">🍽️ Alimentação</option>
+              <option value="Transporte">🚗 Transporte</option>
+              <option value="Saúde">❤️ Saúde</option>
+              <option value="Educação">📚 Educação</option>
+              <option value="Lazer">🎮 Lazer</option>
+              <option value="Roupas">👕 Roupas</option>
+              <option value="Outros">📦 Outros</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Data</label>
+            <input type="date" id="expDate" />
+          </div>
+        </div>
+        <button class="btn-primary btn-full" id="btnAddExpense">+ Adicionar despesa</button>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍  Buscar despesa..." />
+        <select id="filterCategory" class="filter-select">
+          <option value="">Todas as categorias</option>
+          <option value="Moradia">Moradia</option>
+          <option value="Alimentação">Alimentação</option>
+          <option value="Transporte">Transporte</option>
+          <option value="Saúde">Saúde</option>
+          <option value="Educação">Educação</option>
+          <option value="Lazer">Lazer</option>
+          <option value="Roupas">Roupas</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+
+      <ul class="expense-list expense-list--full" id="fullExpenseList">
+        <li class="empty-state">Nenhuma despesa registrada ainda.</li>
+      </ul>
+
+    </section>
+
+    <!-- TAB: RELATÓRIO -->
+    <section class="tab-content" id="tab-relatorio">
+
+      <div class="report-grid">
+        <div class="report-card">
+          <p class="report-label">Maior gasto</p>
+          <p class="report-value" id="reportMax">—</p>
+        </div>
+        <div class="report-card">
+          <p class="report-label">Gasto médio por despesa</p>
+          <p class="report-value" id="reportAvg">—</p>
+        </div>
+        <div class="report-card">
+          <p class="report-label">Total de lançamentos</p>
+          <p class="report-value" id="reportCount">—</p>
+        </div>
+        <div class="report-card">
+          <p class="report-label">Categoria líder</p>
+          <p class="report-value" id="reportTopCat">—</p>
+        </div>
+      </div>
+
+      <div class="chart-card" style="margin-top:1.5rem">
+        <p class="chart-title">Ranking de categorias</p>
+        <canvas id="barChart" height="220"></canvas>
+      </div>
+
+      <div class="insight-block" id="insightBlock">
+        <p class="insight-title">💡 Análise inteligente</p>
+        <p class="insight-text" id="insightText">Adicione suas despesas para receber uma análise.</p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
