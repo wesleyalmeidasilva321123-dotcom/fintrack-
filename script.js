@@ -2,16 +2,18 @@
    FINTRACK — SCRIPT PRINCIPAL
    ======================================== */
 
-// ---- STATE ----
+// ─── STATE ───────────────────────────────
+let currentUser = null; // { email, name, hash }
+
 let state = {
-  months: {},      // { "2025-01": { income: 0, goal: 20, expenses: [] } }
-  currentMonth: '', // "YYYY-MM"
+  months: {},       // { "YYYY-MM": { incomes:[], goal:20, expenses:[] } }
+  currentMonth: '',
 };
 
 const CATEGORY_ICONS = {
-  Moradia: '🏠', Alimentação: '🍽️', Transporte: '🚗',
-  Saúde: '❤️', Educação: '📚', Lazer: '🎮',
-  Roupas: '👕', Outros: '📦',
+  Moradia:'🏠', Alimentação:'🍽️', Transporte:'🚗',
+  Saúde:'❤️',  Educação:'📚',    Lazer:'🎮',
+  Roupas:'👕',  Outros:'📦',
 };
 
 const CHART_COLORS = [
@@ -20,10 +22,153 @@ const CHART_COLORS = [
 ];
 
 let donutChart, lineChart, barChart;
+let activeIncomeType = 'dia20';
 
-// ---- INIT ----
-function init() {
-  loadState();
+// ─── UTILS ───────────────────────────────
+function formatCurrency(v) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
+}
+
+function hashPassword(pw) {
+  // Simple hash (for localStorage-only auth — not production-grade)
+  let hash = 0;
+  for (let i = 0; i < pw.length; i++) {
+    const c = pw.charCodeAt(i);
+    hash = ((hash << 5) - hash) + c;
+    hash |= 0;
+  }
+  return hash.toString(36);
+}
+
+function showToast(msg, duration = 2800) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function setDefaultDate() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('expDate').value = today;
+}
+
+// ─── AUTH ────────────────────────────────
+function getUsers() {
+  try { return JSON.parse(localStorage.getItem('ft_users') || '{}'); } catch { return {}; }
+}
+
+function saveUsers(users) {
+  localStorage.setItem('ft_users', JSON.stringify(users));
+}
+
+function loadSession() {
+  try {
+    const s = localStorage.getItem('ft_session');
+    if (s) currentUser = JSON.parse(s);
+  } catch {}
+}
+
+function saveSession() {
+  localStorage.setItem('ft_session', JSON.stringify(currentUser));
+}
+
+function clearSession() {
+  localStorage.removeItem('ft_session');
+  currentUser = null;
+}
+
+function bindAuth() {
+  // panel switches
+  document.getElementById('goRegister').addEventListener('click', () => {
+    document.getElementById('panelLogin').classList.add('hidden');
+    document.getElementById('panelRegister').classList.remove('hidden');
+  });
+  document.getElementById('goLogin').addEventListener('click', () => {
+    document.getElementById('panelRegister').classList.add('hidden');
+    document.getElementById('panelLogin').classList.remove('hidden');
+  });
+
+  // password toggles
+  document.querySelectorAll('.pw-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const inp = document.getElementById(btn.dataset.target);
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+    });
+  });
+
+  // LOGIN
+  document.getElementById('btnLogin').addEventListener('click', () => {
+    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+    const pw    = document.getElementById('loginPassword').value;
+    const err   = document.getElementById('loginError');
+
+    if (!email || !pw) { err.textContent = 'Preencha todos os campos.'; return; }
+
+    const users = getUsers();
+    const user  = users[email];
+    if (!user || user.hash !== hashPassword(pw)) {
+      err.textContent = 'E-mail ou senha incorretos.';
+      return;
+    }
+
+    err.textContent = '';
+    currentUser = { email, name: user.name };
+    saveSession();
+    bootApp();
+  });
+
+  // REGISTER
+  document.getElementById('btnRegister').addEventListener('click', () => {
+    const name  = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim().toLowerCase();
+    const pw    = document.getElementById('regPassword').value;
+    const conf  = document.getElementById('regConfirm').value;
+    const err   = document.getElementById('regError');
+
+    if (!name || !email || !pw || !conf) { err.textContent = 'Preencha todos os campos.'; return; }
+    if (!/\S+@\S+\.\S+/.test(email))     { err.textContent = 'E-mail inválido.'; return; }
+    if (pw.length < 6)                    { err.textContent = 'Senha deve ter ao menos 6 caracteres.'; return; }
+    if (pw !== conf)                      { err.textContent = 'As senhas não coincidem.'; return; }
+
+    const users = getUsers();
+    if (users[email]) { err.textContent = 'Este e-mail já está cadastrado.'; return; }
+
+    users[email] = { name, hash: hashPassword(pw) };
+    saveUsers(users);
+
+    err.textContent = '';
+    currentUser = { email, name };
+    saveSession();
+    bootApp();
+    showToast(`👋 Bem-vindo(a), ${name}!`);
+  });
+
+  // LOGOUT
+  document.getElementById('btnLogout').addEventListener('click', () => {
+    if (!confirm('Deseja sair da sua conta?')) return;
+    clearSession();
+    location.reload();
+  });
+
+  // Enter key on login
+  ['loginEmail','loginPassword'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btnLogin').click();
+    });
+  });
+}
+
+// ─── BOOT ────────────────────────────────
+function bootApp() {
+  document.getElementById('authOverlay').classList.add('hidden');
+  document.getElementById('appWrapper').classList.remove('hidden');
+
+  // user info in sidebar
+  document.getElementById('userName').textContent  = currentUser.name;
+  document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+
+  loadUserState();
   setCurrentMonth(new Date());
   bindNav();
   bindDashboard();
@@ -31,25 +176,40 @@ function init() {
   setDefaultDate();
 }
 
-function loadState() {
+// ─── USER STATE ──────────────────────────
+function stateKey() { return `ft_data_${currentUser.email}`; }
+
+function loadUserState() {
   try {
-    const saved = localStorage.getItem('fintrack_state');
+    const saved = localStorage.getItem(stateKey());
     if (saved) state = JSON.parse(saved);
-  } catch (e) {}
+    else state = { months: {}, currentMonth: '' };
+  } catch { state = { months: {}, currentMonth: '' }; }
 }
 
 function saveState() {
-  localStorage.setItem('fintrack_state', JSON.stringify(state));
+  localStorage.setItem(stateKey(), JSON.stringify(state));
 }
 
 function getCurrentData() {
   if (!state.months[state.currentMonth]) {
-    state.months[state.currentMonth] = { income: 0, goal: 20, expenses: [] };
+    state.months[state.currentMonth] = { incomes: [], goal: 20, expenses: [] };
   }
-  return state.months[state.currentMonth];
+  // migrate old format
+  const d = state.months[state.currentMonth];
+  if (typeof d.income === 'number') {
+    d.incomes = [{ type: 'dia20', label: 'Salário (dia 20)', amount: d.income }];
+    delete d.income;
+  }
+  if (!d.incomes) d.incomes = [];
+  return d;
 }
 
-// ---- MONTH NAVIGATION ----
+function getTotalIncome() {
+  return getCurrentData().incomes.reduce((s, i) => s + i.amount, 0);
+}
+
+// ─── MONTH NAV ───────────────────────────
 function setCurrentMonth(date) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -66,31 +226,29 @@ function renderMonthLabel() {
     label.charAt(0).toUpperCase() + label.slice(1);
 }
 
-function prevMonth() {
-  const [y, m] = state.currentMonth.split('-').map(Number);
-  const d = new Date(y, m - 2, 1);
-  setCurrentMonth(d);
-}
-
-function nextMonth() {
-  const [y, m] = state.currentMonth.split('-').map(Number);
-  const d = new Date(y, m, 1);
-  setCurrentMonth(d);
-}
-
-// ---- NAV ----
+// ─── NAV ─────────────────────────────────
 function bindNav() {
-  document.querySelectorAll('.nav-btn, .btn-link').forEach(btn => {
+  document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const tab = btn.dataset.tab;
-      if (!tab) return;
-      switchTab(tab);
+      if (tab) switchTab(tab);
     });
   });
-
-  document.getElementById('prevMonth').addEventListener('click', prevMonth);
-  document.getElementById('nextMonth').addEventListener('click', nextMonth);
-  document.getElementById('btnReset').addEventListener('click', resetData);
+  document.getElementById('prevMonth').addEventListener('click', () => {
+    const [y, m] = state.currentMonth.split('-').map(Number);
+    setCurrentMonth(new Date(y, m - 2, 1));
+  });
+  document.getElementById('nextMonth').addEventListener('click', () => {
+    const [y, m] = state.currentMonth.split('-').map(Number);
+    setCurrentMonth(new Date(y, m, 1));
+  });
+  document.getElementById('btnReset').addEventListener('click', () => {
+    if (!confirm('Apagar todos os dados financeiros?')) return;
+    state = { months: {}, currentMonth: '' };
+    saveState();
+    setCurrentMonth(new Date());
+    showToast('🗑️ Dados resetados.');
+  });
 }
 
 function switchTab(tab) {
@@ -100,9 +258,9 @@ function switchTab(tab) {
   document.querySelector(`.nav-btn[data-tab="${tab}"]`)?.classList.add('active');
 
   const titles = {
-    dashboard: ['Dashboard', 'Visão geral das suas finanças'],
-    despesas:  ['Despesas', 'Registre e gerencie seus gastos'],
-    relatorio: ['Relatório', 'Análise detalhada do período'],
+    dashboard: ['Dashboard',  'Visão geral das suas finanças'],
+    despesas:  ['Despesas',   'Registre e gerencie seus gastos'],
+    relatorio: ['Relatório',  'Análise detalhada do período'],
   };
   document.getElementById('pageTitle').textContent = titles[tab][0];
   document.getElementById('pageSub').textContent   = titles[tab][1];
@@ -111,98 +269,145 @@ function switchTab(tab) {
   if (tab === 'despesas')  renderFullList();
 }
 
-// ---- DASHBOARD ----
+// ─── DASHBOARD ───────────────────────────
 function bindDashboard() {
-  document.getElementById('btnSaveIncome').addEventListener('click', () => {
-    const val = parseFloat(document.getElementById('incomeInput').value) || 0;
-    getCurrentData().income = val;
-    saveState();
-    renderAll();
-    showToast('✅ Renda atualizada!');
+  // income type buttons
+  document.querySelectorAll('.income-type-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.income-type-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeIncomeType = btn.dataset.type;
+      updateIncomeFormUI();
+    });
   });
 
-  document.getElementById('goalInput').addEventListener('input', (e) => {
-    const val = Math.min(100, Math.max(0, parseFloat(e.target.value) || 0));
-    getCurrentData().goal = val;
+  document.getElementById('btnSaveIncome').addEventListener('click', saveIncome);
+
+  document.getElementById('goalInput').addEventListener('input', e => {
+    getCurrentData().goal = Math.min(100, Math.max(0, parseFloat(e.target.value) || 0));
     saveState();
     renderProgress();
   });
+}
 
-  document.getElementById('btnGoToDespesas').addEventListener('click', () => switchTab('despesas'));
+function updateIncomeFormUI() {
+  const labels = {
+    dia20:  'Salário (dia 20)',
+    vale:   'Salário principal',
+    custom: 'Salário',
+  };
+  document.getElementById('incomeTypeLabel').textContent = labels[activeIncomeType];
+  document.getElementById('customDateGroup').style.display = activeIncomeType === 'custom' ? '' : 'none';
+  document.getElementById('valeValueGroup').style.display  = activeIncomeType === 'vale'   ? '' : 'none';
+}
+
+function saveIncome() {
+  const amount = parseFloat(document.getElementById('incomeInput').value);
+  if (!amount || amount <= 0) { showToast('⚠️ Informe um valor válido.'); return; }
+
+  const data = getCurrentData();
+  let label = '';
+  let entries = [];
+
+  if (activeIncomeType === 'dia20') {
+    label = 'Salário (dia 20)';
+    // remove previous dia20
+    data.incomes = data.incomes.filter(i => i.type !== 'dia20');
+    entries.push({ type: 'dia20', label, amount });
+
+  } else if (activeIncomeType === 'vale') {
+    const valeAmt = parseFloat(document.getElementById('valeInput').value) || 0;
+    data.incomes = data.incomes.filter(i => i.type !== 'salario_main' && i.type !== 'vale');
+    entries.push({ type: 'salario_main', label: 'Salário principal', amount });
+    if (valeAmt > 0) entries.push({ type: 'vale', label: 'Vale alimentação/refeição', amount: valeAmt });
+
+  } else if (activeIncomeType === 'custom') {
+    const day = parseInt(document.getElementById('customDay').value) || '?';
+    label = `Salário (dia ${day})`;
+    data.incomes = data.incomes.filter(i => i.type !== 'custom');
+    entries.push({ type: 'custom', label, amount });
+  }
+
+  entries.forEach(e => data.incomes.push(e));
+  saveState();
+  renderAll();
+  showToast('✅ Renda atualizada!');
+  document.getElementById('incomeInput').value = '';
+  document.getElementById('valeInput').value   = '';
 }
 
 function renderAll() {
   const data = getCurrentData();
-  // sync inputs
-  document.getElementById('incomeInput').value = data.income || '';
-  document.getElementById('goalInput').value   = data.goal ?? 20;
-
+  document.getElementById('goalInput').value = data.goal ?? 20;
+  renderIncomeBadges();
   renderKPIs();
   renderProgress();
   renderDonut();
   renderLine();
-  renderRecentList();
+  renderDashTable();
+}
+
+function renderIncomeBadges() {
+  const { incomes } = getCurrentData();
+  const el = document.getElementById('incomeBadges');
+  if (!incomes.length) { el.innerHTML = ''; return; }
+  el.innerHTML = incomes.map(i =>
+    `<span class="income-badge">${i.label}: ${formatCurrency(i.amount)}</span>`
+  ).join('');
 }
 
 function renderKPIs() {
-  const { income, expenses } = getCurrentData();
+  const { expenses } = getCurrentData();
+  const income   = getTotalIncome();
   const totalExp = expenses.reduce((s, e) => s + e.amount, 0);
   const balance  = income - totalExp;
   const rate     = income > 0 ? ((balance / income) * 100).toFixed(1) : 0;
 
-  document.getElementById('kpiIncome').textContent  = formatCurrency(income);
-  document.getElementById('kpiExpense').textContent = formatCurrency(totalExp);
-  document.getElementById('kpiBalance').textContent = formatCurrency(balance);
+  document.getElementById('kpiIncome').textContent   = formatCurrency(income);
+  document.getElementById('kpiExpense').textContent  = formatCurrency(totalExp);
+  document.getElementById('kpiBalance').textContent  = formatCurrency(balance);
   document.getElementById('kpiSaveRate').textContent = `${rate}%`;
 
-  const balEl = document.getElementById('kpiBalance');
-  balEl.style.color = balance >= 0 ? 'var(--green-lit)' : 'var(--red-lit)';
-
-  const rateEl = document.getElementById('kpiSaveRate');
-  rateEl.style.color = Number(rate) >= 20 ? 'var(--green-lit)' : Number(rate) >= 0 ? 'var(--gold)' : 'var(--red-lit)';
+  document.getElementById('kpiBalance').style.color  = balance >= 0 ? 'var(--green-lit)' : 'var(--red-lit)';
+  const r = Number(rate);
+  document.getElementById('kpiSaveRate').style.color =
+    r >= 20 ? 'var(--green-lit)' : r >= 0 ? 'var(--gold)' : 'var(--red-lit)';
 }
 
 function renderProgress() {
-  const { income, expenses, goal = 20 } = getCurrentData();
+  const { expenses, goal = 20 } = getCurrentData();
+  const income   = getTotalIncome();
   const totalExp = expenses.reduce((s, e) => s + e.amount, 0);
   const saved    = income - totalExp;
   const rate     = income > 0 ? (saved / income) * 100 : 0;
-  const pct      = income > 0 ? Math.min(100, Math.max(0, (rate / goal) * 100)) : 0;
+  const pct      = income > 0 && goal > 0 ? Math.min(100, Math.max(0, (rate / goal) * 100)) : 0;
 
   document.getElementById('progressBar').style.width = `${pct}%`;
 
   let caption = '';
-  if (income === 0) {
-    caption = 'Defina sua renda para começar.';
-  } else if (rate < 0) {
-    caption = `⚠️ Você está no negativo em ${formatCurrency(Math.abs(saved))}. Revise seus gastos.`;
-  } else if (rate >= goal) {
-    caption = `🎉 Meta atingida! Você está guardando ${rate.toFixed(1)}% da renda (meta: ${goal}%).`;
-  } else {
+  if (income === 0)        caption = 'Defina sua renda para começar.';
+  else if (rate < 0)       caption = `⚠️ Você está no negativo em ${formatCurrency(Math.abs(saved))}. Revise seus gastos.`;
+  else if (rate >= goal)   caption = `🎉 Meta atingida! Guardando ${rate.toFixed(1)}% (meta: ${goal}%).`;
+  else {
     const faltam = formatCurrency((goal / 100) * income - saved);
-    caption = `Guardando ${rate.toFixed(1)}% de ${goal}% da meta. Faltam ${faltam} para atingi-la.`;
+    caption = `Guardando ${rate.toFixed(1)}% de ${goal}% da meta. Faltam ${faltam}.`;
   }
-
   document.getElementById('progressCaption').textContent = caption;
 }
 
-// ---- DONUT CHART ----
+// ─── DONUT ───────────────────────────────
 function renderDonut() {
   const { expenses } = getCurrentData();
-  const byCategory  = groupByCategory(expenses);
-  const labels      = Object.keys(byCategory);
-  const values      = labels.map(l => byCategory[l]);
-  const total       = values.reduce((a, b) => a + b, 0);
+  const byCat  = groupByCategory(expenses);
+  const labels = Object.keys(byCat);
+  const values = labels.map(l => byCat[l]);
+  const total  = values.reduce((a, b) => a + b, 0);
 
   document.getElementById('donutTotal').textContent = formatCurrency(total);
 
   const ctx = document.getElementById('donutChart').getContext('2d');
   if (donutChart) donutChart.destroy();
-
-  if (labels.length === 0) {
-    donutChart = null;
-    return;
-  }
+  if (!labels.length) return;
 
   donutChart = new Chart(ctx, {
     type: 'doughnut',
@@ -219,46 +424,31 @@ function renderDonut() {
     options: {
       cutout: '72%',
       plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            color: '#8B949E',
-            font: { size: 11, family: 'Inter' },
-            boxWidth: 10,
-            padding: 12,
-          }
-        },
-        tooltip: {
-          callbacks: {
-            label: ctx => ` ${formatCurrency(ctx.raw)} (${((ctx.raw / total) * 100).toFixed(1)}%)`
-          }
-        }
+        legend: { position: 'bottom', labels: { color: '#8B949E', font: { size: 11, family: 'Inter' }, boxWidth: 10, padding: 12 } },
+        tooltip: { callbacks: { label: ctx => ` ${formatCurrency(ctx.raw)} (${((ctx.raw/total)*100).toFixed(1)}%)` } }
       }
     }
   });
 }
 
-// ---- LINE CHART ----
+// ─── LINE ────────────────────────────────
 function renderLine() {
   const ctx = document.getElementById('lineChart').getContext('2d');
   if (lineChart) lineChart.destroy();
 
-  // last 6 months
-  const months = [];
-  const incomes = [];
-  const exps    = [];
-  const savings = [];
+  const months = [], incomes = [], exps = [], savings = [];
 
   for (let i = 5; i >= 0; i--) {
     const d = new Date();
     d.setMonth(d.getMonth() - i);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    const monthData = state.months[key] || { income: 0, expenses: [] };
-    const totalExp  = monthData.expenses.reduce((s, e) => s + e.amount, 0);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const md  = state.months[key] || { incomes: [], expenses: [] };
+    const inc = (md.incomes || []).reduce((s, x) => s + x.amount, 0) + (md.income || 0);
+    const exp = (md.expenses || []).reduce((s, x) => s + x.amount, 0);
     months.push(d.toLocaleDateString('pt-BR', { month: 'short' }));
-    incomes.push(monthData.income);
-    exps.push(totalExp);
-    savings.push(monthData.income - totalExp);
+    incomes.push(inc);
+    exps.push(exp);
+    savings.push(inc - exp);
   }
 
   lineChart = new Chart(ctx, {
@@ -266,46 +456,15 @@ function renderLine() {
     data: {
       labels: months,
       datasets: [
-        {
-          label: 'Renda',
-          data: incomes,
-          borderColor: '#2EA043',
-          backgroundColor: 'rgba(46,160,67,0.1)',
-          tension: 0.4,
-          fill: false,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-        },
-        {
-          label: 'Despesas',
-          data: exps,
-          borderColor: '#CF4545',
-          backgroundColor: 'rgba(207,69,69,0.1)',
-          tension: 0.4,
-          fill: false,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-        },
-        {
-          label: 'Economia',
-          data: savings,
-          borderColor: '#E3B341',
-          backgroundColor: 'rgba(227,179,65,0.1)',
-          tension: 0.4,
-          fill: true,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-        },
+        { label: 'Renda',     data: incomes,  borderColor: '#2EA043', tension: 0.4, fill: false, pointRadius: 4 },
+        { label: 'Despesas',  data: exps,     borderColor: '#CF4545', tension: 0.4, fill: false, pointRadius: 4 },
+        { label: 'Economia',  data: savings,  borderColor: '#E3B341', backgroundColor: 'rgba(227,179,65,0.08)', tension: 0.4, fill: true, pointRadius: 4 },
       ]
     },
     options: {
       plugins: {
-        legend: {
-          labels: { color: '#8B949E', font: { size: 11, family: 'Inter' }, boxWidth: 12 }
-        },
-        tooltip: {
-          callbacks: { label: ctx => ` ${ctx.dataset.label}: ${formatCurrency(ctx.raw)}` }
-        }
+        legend: { labels: { color: '#8B949E', font: { size: 11, family: 'Inter' }, boxWidth: 12 } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${formatCurrency(ctx.raw)}` } }
       },
       scales: {
         x: { ticks: { color: '#8B949E', font: { size: 11 } }, grid: { color: '#2A303B' } },
@@ -318,21 +477,38 @@ function renderLine() {
   });
 }
 
-// ---- RECENT LIST ----
-function renderRecentList() {
+// ─── DASHBOARD TABLE ─────────────────────
+function renderDashTable() {
   const { expenses } = getCurrentData();
-  const list  = document.getElementById('recentList');
-  const items = [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
-  list.innerHTML = items.length
-    ? items.map(e => expenseItemHTML(e)).join('')
-    : '<li class="empty-state">Nenhuma despesa registrada ainda.</li>';
+  const sorted = [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const total  = expenses.reduce((s, e) => s + e.amount, 0);
 
-  list.querySelectorAll('.btn-delete').forEach(btn => {
-    btn.addEventListener('click', () => deleteExpense(btn.dataset.id));
-  });
+  document.getElementById('dashExpCount').textContent = `${expenses.length} lançamento${expenses.length !== 1 ? 's' : ''}`;
+  document.getElementById('dashExpTotal').textContent = formatCurrency(total);
+
+  const tbody = document.getElementById('dashExpTableBody');
+
+  if (!sorted.length) {
+    tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Nenhuma despesa registrada.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = sorted.map(e => {
+    const icon    = CATEGORY_ICONS[e.category] || '📦';
+    const dateStr = e.date
+      ? new Date(e.date + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+      : '—';
+    return `
+      <tr>
+        <td>${e.desc}</td>
+        <td><span class="td-cat">${icon} ${e.category}</span></td>
+        <td>${dateStr}</td>
+        <td class="align-right td-amount">- ${formatCurrency(e.amount)}</td>
+      </tr>`;
+  }).join('');
 }
 
-// ---- DESPESAS TAB ----
+// ─── DESPESAS TAB ────────────────────────
 function bindDespesas() {
   document.getElementById('btnAddExpense').addEventListener('click', addExpense);
   document.getElementById('searchInput').addEventListener('input', renderFullList);
@@ -345,12 +521,11 @@ function addExpense() {
   const cat   = document.getElementById('expCategory').value;
   const date  = document.getElementById('expDate').value;
 
-  if (!desc)       return showToast('⚠️ Informe uma descrição.');
-  if (!value || value <= 0) return showToast('⚠️ Informe um valor válido.');
-  if (!date)       return showToast('⚠️ Informe uma data.');
+  if (!desc)          { showToast('⚠️ Informe uma descrição.'); return; }
+  if (!value || value <= 0) { showToast('⚠️ Informe um valor válido.'); return; }
+  if (!date)          { showToast('⚠️ Informe uma data.'); return; }
 
-  const expense = { id: Date.now().toString(), desc, amount: value, category: cat, date };
-  getCurrentData().expenses.push(expense);
+  getCurrentData().expenses.push({ id: Date.now().toString(), desc, amount: value, category: cat, date });
   saveState();
   renderAll();
   renderFullList();
@@ -358,8 +533,7 @@ function addExpense() {
   document.getElementById('expDesc').value  = '';
   document.getElementById('expValue').value = '';
   setDefaultDate();
-
-  showToast(`✅ Despesa "${desc}" adicionada!`);
+  showToast(`✅ "${desc}" adicionado!`);
 }
 
 function deleteExpense(id) {
@@ -377,14 +551,14 @@ function renderFullList() {
   const cat    = document.getElementById('filterCategory').value;
 
   const filtered = expenses.filter(e => {
-    const matchSearch = !search || e.desc.toLowerCase().includes(search) || e.category.toLowerCase().includes(search);
-    const matchCat    = !cat || e.category === cat;
-    return matchSearch && matchCat;
+    const ms = !search || e.desc.toLowerCase().includes(search) || e.category.toLowerCase().includes(search);
+    const mc = !cat || e.category === cat;
+    return ms && mc;
   }).sort((a, b) => new Date(b.date) - new Date(a.date));
 
   const list = document.getElementById('fullExpenseList');
   list.innerHTML = filtered.length
-    ? filtered.map(e => expenseItemHTML(e)).join('')
+    ? filtered.map(expenseItemHTML).join('')
     : '<li class="empty-state">Nenhuma despesa encontrada.</li>';
 
   list.querySelectorAll('.btn-delete').forEach(btn => {
@@ -393,7 +567,7 @@ function renderFullList() {
 }
 
 function expenseItemHTML(e) {
-  const icon = CATEGORY_ICONS[e.category] || '📦';
+  const icon    = CATEGORY_ICONS[e.category] || '📦';
   const dateStr = e.date
     ? new Date(e.date + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
     : '';
@@ -411,109 +585,84 @@ function expenseItemHTML(e) {
     </li>`;
 }
 
-// ---- REPORT ----
+// ─── REPORT ──────────────────────────────
 function renderReport() {
-  const { income, expenses } = getCurrentData();
+  const { expenses } = getCurrentData();
+  const income   = getTotalIncome();
   const totalExp = expenses.reduce((s, e) => s + e.amount, 0);
-  const byCategory = groupByCategory(expenses);
+  const byCat    = groupByCategory(expenses);
 
-  // KPIs
-  if (expenses.length === 0) {
+  if (!expenses.length) {
     ['reportMax','reportAvg','reportCount','reportTopCat'].forEach(id => {
       document.getElementById(id).textContent = '—';
     });
     document.getElementById('insightText').textContent = 'Adicione despesas para ver a análise.';
   } else {
-    const max = Math.max(...expenses.map(e => e.amount));
+    const max     = Math.max(...expenses.map(e => e.amount));
     const maxItem = expenses.find(e => e.amount === max);
-    document.getElementById('reportMax').textContent = `${formatCurrency(max)} (${maxItem.desc})`;
-    document.getElementById('reportAvg').textContent = formatCurrency(totalExp / expenses.length);
-    document.getElementById('reportCount').textContent = `${expenses.length} lançamentos`;
-
-    const topCat = Object.entries(byCategory).sort((a,b) => b[1]-a[1])[0];
-    document.getElementById('reportTopCat').textContent = topCat
-      ? `${CATEGORY_ICONS[topCat[0]]} ${topCat[0]} (${formatCurrency(topCat[1])})`
+    document.getElementById('reportMax').textContent     = `${formatCurrency(max)} — ${maxItem.desc}`;
+    document.getElementById('reportAvg').textContent     = formatCurrency(totalExp / expenses.length);
+    document.getElementById('reportCount').textContent   = `${expenses.length} lançamentos`;
+    const topCat = Object.entries(byCat).sort((a,b) => b[1]-a[1])[0];
+    document.getElementById('reportTopCat').textContent  = topCat
+      ? `${CATEGORY_ICONS[topCat[0]]} ${topCat[0]}`
       : '—';
-
-    renderInsight(income, totalExp, byCategory, expenses);
+    renderInsight(income, totalExp, byCat, expenses);
   }
 
-  renderBarChart(byCategory);
+  renderBarChart(byCat);
 }
 
-function renderInsight(income, totalExp, byCategory, expenses) {
+function renderInsight(income, totalExp, byCat, expenses) {
   const balance = income - totalExp;
   const rate    = income > 0 ? (balance / income) * 100 : 0;
   const lines   = [];
 
-  if (income === 0) {
-    lines.push('Cadastre sua renda mensal para uma análise completa.');
-  } else if (rate < 0) {
-    lines.push(`🚨 Seus gastos superam a renda em ${formatCurrency(Math.abs(balance))}. É hora de rever o orçamento.`);
-  } else if (rate >= 30) {
-    lines.push(`🌟 Excelente! Você está guardando ${rate.toFixed(1)}% da renda — muito acima da média recomendada.`);
-  } else if (rate >= 20) {
-    lines.push(`✅ Você está guardando ${rate.toFixed(1)}% da renda — dentro da meta saudável de 20%.`);
-  } else if (rate > 0) {
-    lines.push(`📈 Você guarda ${rate.toFixed(1)}% da renda. Tente reduzir gastos para atingir a meta de 20%.`);
-  }
+  if (income === 0)       lines.push('Cadastre sua renda para uma análise completa.');
+  else if (rate < 0)      lines.push(`🚨 Seus gastos superam a renda em ${formatCurrency(Math.abs(balance))}. Reveja o orçamento.`);
+  else if (rate >= 30)    lines.push(`🌟 Excelente! Guardando ${rate.toFixed(1)}% — acima da média recomendada.`);
+  else if (rate >= 20)    lines.push(`✅ Guardando ${rate.toFixed(1)}% — dentro da meta saudável de 20%.`);
+  else                    lines.push(`📈 Guardando ${rate.toFixed(1)}%. Tente reduzir gastos para atingir 20%.`);
 
-  const topCats = Object.entries(byCategory).sort((a,b) => b[1]-a[1]).slice(0,2);
-  if (topCats.length > 0) {
-    const pct = ((topCats[0][1] / totalExp) * 100).toFixed(0);
-    lines.push(`Sua maior categoria é ${topCats[0][0]} (${pct}% das despesas).`);
-  }
+  const top = Object.entries(byCat).sort((a,b)=>b[1]-a[1])[0];
+  if (top) lines.push(`Sua maior categoria é ${top[0]} (${((top[1]/totalExp)*100).toFixed(0)}% das despesas).`);
 
-  if (expenses.length >= 3) {
-    const avg = totalExp / expenses.length;
-    const acimaDaMedia = expenses.filter(e => e.amount > avg * 2);
-    if (acimaDaMedia.length > 0) {
-      lines.push(`💡 ${acimaDaMedia.length} gasto(s) estão bem acima da sua média — verifique se são essenciais.`);
-    }
-  }
+  const avg = totalExp / expenses.length;
+  const altos = expenses.filter(e => e.amount > avg * 2);
+  if (altos.length) lines.push(`💡 ${altos.length} gasto(s) bem acima da média — verifique se são essenciais.`);
 
   document.getElementById('insightText').textContent = lines.join(' ');
 }
 
-function renderBarChart(byCategory) {
+function renderBarChart(byCat) {
   const ctx = document.getElementById('barChart').getContext('2d');
   if (barChart) barChart.destroy();
 
-  const sorted  = Object.entries(byCategory).sort((a,b) => b[1]-a[1]);
-  const labels  = sorted.map(([k]) => `${CATEGORY_ICONS[k]} ${k}`);
-  const values  = sorted.map(([,v]) => v);
+  const sorted = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const labels = sorted.map(([k]) => `${CATEGORY_ICONS[k]} ${k}`);
+  const values = sorted.map(([,v]) => v);
 
   barChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels,
-      datasets: [{
-        data: values,
-        backgroundColor: CHART_COLORS.slice(0, labels.length),
-        borderRadius: 6,
-        borderSkipped: false,
-      }]
+      datasets: [{ data: values, backgroundColor: CHART_COLORS.slice(0, labels.length), borderRadius: 6, borderSkipped: false }]
     },
     options: {
       indexAxis: 'y',
       plugins: {
         legend: { display: false },
-        tooltip: {
-          callbacks: { label: ctx => ` ${formatCurrency(ctx.raw)}` }
-        }
+        tooltip: { callbacks: { label: ctx => ` ${formatCurrency(ctx.raw)}` } }
       },
       scales: {
-        x: {
-          ticks: { color: '#8B949E', font: { size: 11 }, callback: v => 'R$' + (v >= 1000 ? (v/1000).toFixed(1)+'k' : v) },
-          grid: { color: '#2A303B' }
-        },
+        x: { ticks: { color: '#8B949E', font: { size: 11 }, callback: v => 'R$'+(v>=1000?(v/1000).toFixed(1)+'k':v) }, grid: { color: '#2A303B' } },
         y: { ticks: { color: '#E6EDF3', font: { size: 12 } }, grid: { display: false } }
       }
     }
   });
 }
 
-// ---- HELPERS ----
+// ─── HELPERS ─────────────────────────────
 function groupByCategory(expenses) {
   return expenses.reduce((acc, e) => {
     acc[e.category] = (acc[e.category] || 0) + e.amount;
@@ -521,29 +670,13 @@ function groupByCategory(expenses) {
   }, {});
 }
 
-function formatCurrency(v) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
-}
-
-function setDefaultDate() {
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('expDate').value = today;
-}
-
-function showToast(msg, duration = 2800) {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), duration);
-}
-
-function resetData() {
-  if (!confirm('Tem certeza? Todos os dados serão apagados.')) return;
-  state = { months: {}, currentMonth: '' };
-  localStorage.removeItem('fintrack_state');
-  setCurrentMonth(new Date());
-  showToast('🗑️ Dados resetados.');
-}
-
-// ---- START ----
-document.addEventListener('DOMContentLoaded', init);
+// ─── INIT ────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  bindAuth();
+  loadSession();
+  if (currentUser) {
+    bootApp();
+  }
+  // default income type UI
+  updateIncomeFormUI();
+});
