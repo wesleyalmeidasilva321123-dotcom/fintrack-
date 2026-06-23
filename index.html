@@ -11,58 +11,25 @@
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════
-     AUTH
-═══════════════════════════════════════ -->
+<!-- ═══════ AUTH ═══════ -->
 <div id="authScreen" class="auth-screen">
   <div class="auth-card">
     <div class="auth-logo"><span class="logo-icon">◈</span><span class="logo-text">FinTrack</span></div>
     <p class="auth-tagline">Seu controle financeiro pessoal</p>
-
-    <!-- LOGIN -->
     <div id="panelLogin" class="auth-panel">
       <h2 class="auth-title">Entrar</h2>
-      <div class="auth-field">
-        <label>E-mail</label>
-        <input type="email" id="loginEmail" placeholder="seu@email.com" autocomplete="email" />
-      </div>
-      <div class="auth-field">
-        <label>Senha</label>
-        <div class="pw-wrap">
-          <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" />
-          <button class="pw-toggle" data-target="loginPassword">👁</button>
-        </div>
-      </div>
+      <div class="auth-field"><label>E-mail</label><input type="email" id="loginEmail" placeholder="seu@email.com" autocomplete="email" /></div>
+      <div class="auth-field"><label>Senha</label><div class="pw-wrap"><input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" /><button class="pw-toggle" data-target="loginPassword">👁</button></div></div>
       <p class="auth-error" id="loginError"></p>
       <button class="btn-auth" id="btnLogin">Entrar</button>
       <p class="auth-switch">Não tem conta? <button class="link-btn" id="goRegister">Criar agora</button></p>
     </div>
-
-    <!-- REGISTER -->
     <div id="panelRegister" class="auth-panel" style="display:none">
       <h2 class="auth-title">Criar conta</h2>
-      <div class="auth-field">
-        <label>Nome</label>
-        <input type="text" id="regName" placeholder="Seu nome" />
-      </div>
-      <div class="auth-field">
-        <label>E-mail</label>
-        <input type="email" id="regEmail" placeholder="seu@email.com" />
-      </div>
-      <div class="auth-field">
-        <label>Senha</label>
-        <div class="pw-wrap">
-          <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres" />
-          <button class="pw-toggle" data-target="regPassword">👁</button>
-        </div>
-      </div>
-      <div class="auth-field">
-        <label>Confirmar senha</label>
-        <div class="pw-wrap">
-          <input type="password" id="regConfirm" placeholder="Repita a senha" />
-          <button class="pw-toggle" data-target="regConfirm">👁</button>
-        </div>
-      </div>
+      <div class="auth-field"><label>Nome</label><input type="text" id="regName" placeholder="Seu nome" /></div>
+      <div class="auth-field"><label>E-mail</label><input type="email" id="regEmail" placeholder="seu@email.com" /></div>
+      <div class="auth-field"><label>Senha</label><div class="pw-wrap"><input type="password" id="regPassword" placeholder="Mínimo 6 caracteres" /><button class="pw-toggle" data-target="regPassword">👁</button></div></div>
+      <div class="auth-field"><label>Confirmar senha</label><div class="pw-wrap"><input type="password" id="regConfirm" placeholder="Repita a senha" /><button class="pw-toggle" data-target="regConfirm">👁</button></div></div>
       <p class="auth-error" id="regError"></p>
       <button class="btn-auth" id="btnRegister">Criar conta</button>
       <p class="auth-switch">Já tem conta? <button class="link-btn" id="goLogin">Entrar</button></p>
@@ -70,17 +37,15 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════
-     APP
-═══════════════════════════════════════ -->
+<!-- ═══════ APP ═══════ -->
 <div id="appScreen" class="app-screen" style="display:none">
 
-  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="logo"><span class="logo-icon">◈</span><span class="logo-text">FinTrack</span></div>
     <nav class="nav">
       <button class="nav-btn active" data-tab="dashboard"><span class="nav-icon">▣</span><span>Dashboard</span></button>
       <button class="nav-btn nav-despesas" data-tab="despesas"><span class="nav-icon">↓</span><span>Despesas</span></button>
+      <button class="nav-btn nav-invest" data-tab="investimentos"><span class="nav-icon">📈</span><span>Investimentos</span></button>
       <button class="nav-btn" data-tab="relatorio"><span class="nav-icon">◎</span><span>Relatório</span></button>
     </nav>
     <div class="sidebar-footer">
@@ -93,7 +58,6 @@
     </div>
   </aside>
 
-  <!-- MAIN -->
   <main class="main">
     <header class="topbar">
       <div>
@@ -109,53 +73,34 @@
 
     <!-- ── DASHBOARD ── -->
     <section class="tab" id="tab-dashboard">
-
-      <!-- TOP BALANCE STRIP -->
       <div class="balance-strip">
         <div class="balance-main">
-          <span class="balance-label">Saldo atual</span>
+          <span class="balance-label">Saldo total</span>
           <span class="balance-value" id="balanceTop">R$ 0,00</span>
         </div>
         <div class="balance-pills">
-          <div class="b-pill b-pill--green">
-            <span class="b-pill-label">↑ Entrou</span>
-            <span class="b-pill-val" id="stripIn">R$ 0,00</span>
-          </div>
-          <div class="b-pill b-pill--red">
-            <span class="b-pill-label">↓ Saiu</span>
-            <span class="b-pill-val" id="stripOut">R$ 0,00</span>
-          </div>
-          <div class="b-pill b-pill--gold">
-            <span class="b-pill-label">🐷 Guardado</span>
-            <span class="b-pill-val" id="stripSaved">R$ 0,00</span>
-          </div>
-          <div class="b-pill b-pill--blue">
-            <span class="b-pill-label">📅 Previsão</span>
-            <span class="b-pill-val" id="stripForecast">R$ 0,00</span>
-          </div>
+          <div class="b-pill b-pill--green"><span class="b-pill-label">↑ Salário</span><span class="b-pill-val" id="stripIn">R$ 0,00</span></div>
+          <div class="b-pill b-pill--purple"><span class="b-pill-label">🎫 Voucher</span><span class="b-pill-val" id="stripVoucher">R$ 0,00</span></div>
+          <div class="b-pill b-pill--red"><span class="b-pill-label">↓ Gastos</span><span class="b-pill-val" id="stripOut">R$ 0,00</span></div>
+          <div class="b-pill b-pill--gold"><span class="b-pill-label">📈 Investido</span><span class="b-pill-val" id="stripInvested">R$ 0,00</span></div>
+          <div class="b-pill b-pill--blue"><span class="b-pill-label">📅 Previsão</span><span class="b-pill-val" id="stripForecast">R$ 0,00</span></div>
         </div>
       </div>
 
       <!-- INCOME SETUP -->
       <div class="card income-setup">
         <div class="income-setup-hd">
-          <span class="card-title">💰 Cadastro de salário</span>
+          <span class="card-title">💰 Cadastro de renda</span>
         </div>
         <div class="income-types">
           <button class="it-btn active" data-type="dia20">
-            <span class="it-icon">📅</span>
-            <span class="it-name">Dia 20</span>
-            <span class="it-desc">Salário fixo no dia 20</span>
+            <span class="it-icon">📅</span><span class="it-name">Dia 20</span><span class="it-desc">Salário fixo no dia 20</span>
           </button>
           <button class="it-btn" data-type="vale">
-            <span class="it-icon">🎫</span>
-            <span class="it-name">+ Vale</span>
-            <span class="it-desc">Salário + Vale alimentação</span>
+            <span class="it-icon">🎫</span><span class="it-name">Salário + Voucher</span><span class="it-desc">Salário + vale separados</span>
           </button>
           <button class="it-btn" data-type="custom">
-            <span class="it-icon">🗓️</span>
-            <span class="it-name">Outra data</span>
-            <span class="it-desc">Escolha o dia de recebimento</span>
+            <span class="it-icon">🗓️</span><span class="it-name">Outra data</span><span class="it-desc">Escolha o dia de recebimento</span>
           </button>
         </div>
         <div class="income-row">
@@ -163,9 +108,13 @@
             <label id="mainIncomeLabel">Salário (R$)</label>
             <div class="input-money"><span>R$</span><input type="number" id="incomeMain" placeholder="0,00" /></div>
           </div>
-          <div class="field-sm" id="valeField" style="display:none">
-            <label>Vale (R$)</label>
-            <div class="input-money"><span>R$</span><input type="number" id="incomeVale" placeholder="0,00" /></div>
+          <div class="field-sm" id="voucherSalField" style="display:none">
+            <label>Voucher alimentação (R$)</label>
+            <div class="input-money"><span>R$</span><input type="number" id="incomeVoucher" placeholder="0,00" /></div>
+          </div>
+          <div class="field-sm" id="voucherRefeField" style="display:none">
+            <label>Vale refeição (R$)</label>
+            <div class="input-money"><span>R$</span><input type="number" id="incomeVoucherRefe" placeholder="0,00" /></div>
           </div>
           <div class="field-sm" id="customDayField" style="display:none">
             <label>Dia de recebimento</label>
@@ -174,6 +123,34 @@
           <button class="btn-primary" id="btnSaveIncome">Salvar</button>
         </div>
         <div id="incomeBadges" class="income-badges"></div>
+      </div>
+
+      <!-- SALDOS POR CARTEIRA -->
+      <div class="card wallet-card">
+        <div class="wallet-hd"><span class="card-title">👛 Saldo por carteira</span></div>
+        <div class="wallets-grid" id="walletsGrid">
+          <div class="wallet-item wallet-item--salary">
+            <span class="wallet-icon">💵</span>
+            <div class="wallet-info">
+              <span class="wallet-name">Salário</span>
+              <span class="wallet-bal" id="walletSalaryBal">R$ 0,00</span>
+            </div>
+          </div>
+          <div class="wallet-item wallet-item--voucher">
+            <span class="wallet-icon">🎫</span>
+            <div class="wallet-info">
+              <span class="wallet-name">Voucher alimentação</span>
+              <span class="wallet-bal" id="walletVoucherBal">R$ 0,00</span>
+            </div>
+          </div>
+          <div class="wallet-item wallet-item--refe">
+            <span class="wallet-icon">🍽️</span>
+            <div class="wallet-info">
+              <span class="wallet-name">Vale refeição</span>
+              <span class="wallet-bal" id="walletRefeBal">R$ 0,00</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- META DE RESERVA -->
@@ -193,7 +170,6 @@
           <span id="reserveCaption">Defina sua meta acima.</span>
           <span id="reservePct" class="reserve-pct">0%</span>
         </div>
-        <!-- SAVINGS RATE -->
         <div class="savings-mini">
           <span>Meta mensal de economia:</span>
           <div class="savings-inline">
@@ -223,7 +199,6 @@
         </div>
       </div>
 
-      <!-- DESPESAS TABLE -->
       <div class="card">
         <div class="table-hd">
           <p class="card-title">Despesas do mês</p>
@@ -234,12 +209,11 @@
         </div>
         <div class="table-wrap">
           <table class="exp-table">
-            <thead><tr><th>Descrição</th><th>Categoria</th><th>Data</th><th class="ar">Valor</th></tr></thead>
-            <tbody id="dashTableBody"><tr><td colspan="4" class="empty">Nenhuma despesa.</td></tr></tbody>
+            <thead><tr><th>Descrição</th><th>Categoria</th><th>Carteira</th><th>Data</th><th class="ar">Valor</th></tr></thead>
+            <tbody id="dashTableBody"><tr><td colspan="5" class="empty">Nenhuma despesa.</td></tr></tbody>
           </table>
         </div>
       </div>
-
     </section>
 
     <!-- ── DESPESAS ── -->
@@ -252,14 +226,70 @@
           <div class="field">
             <label>Categoria</label>
             <select id="expCat">
-              <option value="Moradia">🏠 Moradia</option>
-              <option value="Alimentação">🍽️ Alimentação</option>
-              <option value="Transporte">🚗 Transporte</option>
-              <option value="Saúde">❤️ Saúde</option>
-              <option value="Educação">📚 Educação</option>
-              <option value="Lazer">🎮 Lazer</option>
-              <option value="Roupas">👕 Roupas</option>
-              <option value="Outros">📦 Outros</option>
+              <optgroup label="🏡 Moradia">
+                <option value="Aluguel">🏠 Aluguel</option>
+                <option value="Condomínio">🏢 Condomínio</option>
+                <option value="Água/Luz/Gás">💡 Água / Luz / Gás</option>
+                <option value="Internet">📡 Internet</option>
+                <option value="Manutenção">🔧 Manutenção casa</option>
+              </optgroup>
+              <optgroup label="🍽️ Alimentação">
+                <option value="Supermercado">🛒 Supermercado</option>
+                <option value="Restaurante">🍽️ Restaurante</option>
+                <option value="Delivery">🛵 Delivery</option>
+                <option value="Padaria/Café">☕ Padaria / Café</option>
+              </optgroup>
+              <optgroup label="🚗 Transporte">
+                <option value="Combustível">⛽ Combustível</option>
+                <option value="Transporte público">🚌 Transporte público</option>
+                <option value="Uber/99">🚖 Uber / 99</option>
+                <option value="Estacionamento">🅿️ Estacionamento</option>
+                <option value="IPVA/Seguro">🚗 IPVA / Seguro auto</option>
+              </optgroup>
+              <optgroup label="❤️ Saúde">
+                <option value="Farmácia">💊 Farmácia</option>
+                <option value="Consulta médica">🩺 Consulta médica</option>
+                <option value="Plano de saúde">🏥 Plano de saúde</option>
+                <option value="Academia">🏋️ Academia</option>
+              </optgroup>
+              <optgroup label="📚 Educação">
+                <option value="Faculdade/Curso">🎓 Faculdade / Curso</option>
+                <option value="Livros">📖 Livros</option>
+                <option value="Escola filhos">🏫 Escola filhos</option>
+              </optgroup>
+              <optgroup label="🎮 Lazer">
+                <option value="Streaming">📺 Streaming</option>
+                <option value="Games">🎮 Games</option>
+                <option value="Cinema/Teatro">🎬 Cinema / Teatro</option>
+                <option value="Viagem">✈️ Viagem</option>
+                <option value="Hobby">🎨 Hobby</option>
+              </optgroup>
+              <optgroup label="👕 Pessoal">
+                <option value="Roupas">👕 Roupas</option>
+                <option value="Calçados">👟 Calçados</option>
+                <option value="Beleza/Barbearia">💈 Beleza / Barbearia</option>
+                <option value="Higiene">🧴 Higiene pessoal</option>
+              </optgroup>
+              <optgroup label="💳 Financeiro">
+                <option value="Cartão crédito">💳 Fatura cartão</option>
+                <option value="Empréstimo">🏦 Empréstimo / Financ.</option>
+                <option value="Seguros">🛡️ Seguros</option>
+                <option value="Impostos">📋 Impostos / Taxas</option>
+              </optgroup>
+              <optgroup label="🐾 Outros">
+                <option value="Pet">🐾 Pet</option>
+                <option value="Presente">🎁 Presente</option>
+                <option value="Doação">❤️ Doação</option>
+                <option value="Outros">📦 Outros</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="field">
+            <label>Pagar com</label>
+            <select id="expWallet">
+              <option value="salary">💵 Salário</option>
+              <option value="voucher">🎫 Voucher alimentação</option>
+              <option value="refeicao">🍽️ Vale refeição</option>
             </select>
           </div>
           <div class="field"><label>Data</label><input type="date" id="expDate" /></div>
@@ -271,18 +301,139 @@
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 Buscar..." />
         <select id="filterCat" class="filter-select">
           <option value="">Todas as categorias</option>
-          <option value="Moradia">Moradia</option>
-          <option value="Alimentação">Alimentação</option>
-          <option value="Transporte">Transporte</option>
-          <option value="Saúde">Saúde</option>
-          <option value="Educação">Educação</option>
-          <option value="Lazer">Lazer</option>
+          <option value="Aluguel">Aluguel</option>
+          <option value="Condomínio">Condomínio</option>
+          <option value="Água/Luz/Gás">Água/Luz/Gás</option>
+          <option value="Internet">Internet</option>
+          <option value="Manutenção">Manutenção casa</option>
+          <option value="Supermercado">Supermercado</option>
+          <option value="Restaurante">Restaurante</option>
+          <option value="Delivery">Delivery</option>
+          <option value="Padaria/Café">Padaria/Café</option>
+          <option value="Combustível">Combustível</option>
+          <option value="Transporte público">Transporte público</option>
+          <option value="Uber/99">Uber/99</option>
+          <option value="Estacionamento">Estacionamento</option>
+          <option value="IPVA/Seguro">IPVA/Seguro auto</option>
+          <option value="Farmácia">Farmácia</option>
+          <option value="Consulta médica">Consulta médica</option>
+          <option value="Plano de saúde">Plano de saúde</option>
+          <option value="Academia">Academia</option>
+          <option value="Faculdade/Curso">Faculdade/Curso</option>
+          <option value="Livros">Livros</option>
+          <option value="Escola filhos">Escola filhos</option>
+          <option value="Streaming">Streaming</option>
+          <option value="Games">Games</option>
+          <option value="Cinema/Teatro">Cinema/Teatro</option>
+          <option value="Viagem">Viagem</option>
+          <option value="Hobby">Hobby</option>
           <option value="Roupas">Roupas</option>
+          <option value="Calçados">Calçados</option>
+          <option value="Beleza/Barbearia">Beleza/Barbearia</option>
+          <option value="Higiene">Higiene pessoal</option>
+          <option value="Cartão crédito">Fatura cartão</option>
+          <option value="Empréstimo">Empréstimo/Financ.</option>
+          <option value="Seguros">Seguros</option>
+          <option value="Impostos">Impostos/Taxas</option>
+          <option value="Pet">Pet</option>
+          <option value="Presente">Presente</option>
+          <option value="Doação">Doação</option>
           <option value="Outros">Outros</option>
+        </select>
+        <select id="filterWallet" class="filter-select">
+          <option value="">Todas as carteiras</option>
+          <option value="salary">Salário</option>
+          <option value="voucher">Voucher</option>
+          <option value="refeicao">Vale refeição</option>
         </select>
       </div>
 
       <ul class="exp-list" id="fullList"><li class="empty">Nenhuma despesa ainda.</li></ul>
+    </section>
+
+    <!-- ── INVESTIMENTOS ── -->
+    <section class="tab" id="tab-investimentos" style="display:none">
+      <!-- ADD WALLET -->
+      <div class="card">
+        <h2 class="card-title">➕ Adicionar carteira de investimento</h2>
+        <div class="form-grid form-grid--inv">
+          <div class="field">
+            <label>Nome</label>
+            <input type="text" id="invName" placeholder="Ex: Caixinha Nubank" />
+          </div>
+          <div class="field">
+            <label>Tipo / Banco</label>
+            <select id="invType">
+              <option value="nubank_caixinha">🟣 Nubank — Caixinha (CDI)</option>
+              <option value="nubank_rdb">🟣 Nubank — RDB (CDI)</option>
+              <option value="inter_cdb">🟠 Banco Inter — CDB (CDI)</option>
+              <option value="picpay">💚 PicPay — Rendimento</option>
+              <option value="poupanca">🏦 Poupança</option>
+              <option value="tesouro_selic">🇧🇷 Tesouro Selic</option>
+              <option value="tesouro_ipca">🇧🇷 Tesouro IPCA+</option>
+              <option value="cdb_100cdi">📊 CDB 100% CDI</option>
+              <option value="cdb_110cdi">📊 CDB 110% CDI</option>
+              <option value="lci_lca">🌾 LCI / LCA</option>
+              <option value="fii">🏢 FII (Fundo Imobiliário)</option>
+              <option value="acoes">📈 Ações</option>
+              <option value="cripto">🪙 Cripto</option>
+              <option value="custom">⚙️ Taxa personalizada</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Valor inicial (R$)</label>
+            <input type="number" id="invAmount" placeholder="0,00" />
+          </div>
+          <div class="field">
+            <label>Data de início</label>
+            <input type="date" id="invDate" />
+          </div>
+          <div class="field" id="invCustomRateField" style="display:none">
+            <label>Taxa anual (%)</label>
+            <input type="number" id="invCustomRate" placeholder="12,5" step="0.01" />
+          </div>
+          <div class="field" id="invCdiPctField" style="display:none">
+            <label>% do CDI</label>
+            <input type="number" id="invCdiPct" placeholder="100" step="1" />
+          </div>
+        </div>
+        <button class="btn-primary btn-full" id="btnAddInvestment">+ Adicionar investimento</button>
+      </div>
+
+      <!-- CDI INFO BAR -->
+      <div class="cdi-bar">
+        <span class="cdi-label">CDI atual estimado:</span>
+        <span class="cdi-rate" id="cdiRateLabel">10,50% a.a.</span>
+        <input type="number" id="cdiRateInput" class="input-plain input-plain--xs" value="10.50" step="0.01" title="Editar taxa CDI" />
+        <span class="cdi-label">% a.a. — Selic:</span>
+        <span class="cdi-rate" id="selicLabel">10,50%</span>
+        <input type="number" id="selicInput" class="input-plain input-plain--xs" value="10.50" step="0.01" title="Editar Selic" />
+        <span class="cdi-label">% a.a.</span>
+        <button class="btn-primary btn-sm" id="btnSaveRates">Salvar taxas</button>
+      </div>
+
+      <!-- PORTFOLIO SUMMARY -->
+      <div class="portfolio-summary" id="portfolioSummary">
+        <div class="ps-card">
+          <span class="ps-label">Total investido</span>
+          <span class="ps-val" id="psTotal">R$ 0,00</span>
+        </div>
+        <div class="ps-card ps-card--green">
+          <span class="ps-label">Rendimento total</span>
+          <span class="ps-val" id="psYield">+ R$ 0,00</span>
+        </div>
+        <div class="ps-card">
+          <span class="ps-label">Valor atual</span>
+          <span class="ps-val" id="psCurrent">R$ 0,00</span>
+        </div>
+        <div class="ps-card ps-card--blue">
+          <span class="ps-label">Rendimento hoje</span>
+          <span class="ps-val" id="psToday">+ R$ 0,00</span>
+        </div>
+      </div>
+
+      <!-- INVESTMENTS LIST -->
+      <div id="investmentsList" class="investments-list"></div>
     </section>
 
     <!-- ── RELATÓRIO ── -->
@@ -293,6 +444,7 @@
         <div class="card"><p class="report-lbl">Lançamentos</p><p class="report-val" id="rCount">—</p></div>
         <div class="card"><p class="report-lbl">Categoria líder</p><p class="report-val" id="rTop">—</p></div>
       </div>
+      <div class="report-wallets" id="reportWallets"></div>
       <div class="card" style="margin-top:1rem">
         <p class="card-title">Ranking de categorias</p>
         <canvas id="barChart" height="220"></canvas>
