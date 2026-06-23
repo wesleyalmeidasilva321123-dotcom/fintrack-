@@ -3,361 +3,310 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FinTrack — Controle Financeiro</title>
+  <title>FinTrack</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@300;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- ══════════════════════════════════════
-       AUTH SCREEN
-  ══════════════════════════════════════ -->
-  <div class="auth-overlay" id="authOverlay">
-    <div class="auth-card">
-      <div class="auth-logo">
-        <span class="logo-icon">◈</span>
-        <span class="logo-text">FinTrack</span>
-      </div>
-      <p class="auth-tagline">Seu controle financeiro pessoal</p>
+<!-- ═══════════════════════════════════════
+     AUTH
+═══════════════════════════════════════ -->
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo"><span class="logo-icon">◈</span><span class="logo-text">FinTrack</span></div>
+    <p class="auth-tagline">Seu controle financeiro pessoal</p>
 
-      <!-- LOGIN -->
-      <div class="auth-panel" id="panelLogin">
-        <h2 class="auth-title">Entrar</h2>
-        <div class="auth-field">
-          <label>E-mail</label>
-          <input type="email" id="loginEmail" placeholder="seu@email.com" />
-        </div>
-        <div class="auth-field">
-          <label>Senha</label>
-          <div class="pw-wrap">
-            <input type="password" id="loginPassword" placeholder="••••••••" />
-            <button class="pw-toggle" data-target="loginPassword">👁</button>
-          </div>
-        </div>
-        <p class="auth-error" id="loginError"></p>
-        <button class="btn-auth" id="btnLogin">Entrar</button>
-        <p class="auth-switch">Não tem conta? <button class="link-btn" id="goRegister">Criar agora</button></p>
+    <!-- LOGIN -->
+    <div id="panelLogin" class="auth-panel">
+      <h2 class="auth-title">Entrar</h2>
+      <div class="auth-field">
+        <label>E-mail</label>
+        <input type="email" id="loginEmail" placeholder="seu@email.com" autocomplete="email" />
       </div>
+      <div class="auth-field">
+        <label>Senha</label>
+        <div class="pw-wrap">
+          <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" />
+          <button class="pw-toggle" data-target="loginPassword">👁</button>
+        </div>
+      </div>
+      <p class="auth-error" id="loginError"></p>
+      <button class="btn-auth" id="btnLogin">Entrar</button>
+      <p class="auth-switch">Não tem conta? <button class="link-btn" id="goRegister">Criar agora</button></p>
+    </div>
 
-      <!-- REGISTER -->
-      <div class="auth-panel hidden" id="panelRegister">
-        <h2 class="auth-title">Criar conta</h2>
-        <div class="auth-field">
-          <label>Nome</label>
-          <input type="text" id="regName" placeholder="Seu nome" />
-        </div>
-        <div class="auth-field">
-          <label>E-mail</label>
-          <input type="email" id="regEmail" placeholder="seu@email.com" />
-        </div>
-        <div class="auth-field">
-          <label>Senha</label>
-          <div class="pw-wrap">
-            <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres" />
-            <button class="pw-toggle" data-target="regPassword">👁</button>
-          </div>
-        </div>
-        <div class="auth-field">
-          <label>Confirmar senha</label>
-          <div class="pw-wrap">
-            <input type="password" id="regConfirm" placeholder="Repita a senha" />
-            <button class="pw-toggle" data-target="regConfirm">👁</button>
-          </div>
-        </div>
-        <p class="auth-error" id="regError"></p>
-        <button class="btn-auth" id="btnRegister">Criar conta</button>
-        <p class="auth-switch">Já tem conta? <button class="link-btn" id="goLogin">Entrar</button></p>
+    <!-- REGISTER -->
+    <div id="panelRegister" class="auth-panel" style="display:none">
+      <h2 class="auth-title">Criar conta</h2>
+      <div class="auth-field">
+        <label>Nome</label>
+        <input type="text" id="regName" placeholder="Seu nome" />
       </div>
+      <div class="auth-field">
+        <label>E-mail</label>
+        <input type="email" id="regEmail" placeholder="seu@email.com" />
+      </div>
+      <div class="auth-field">
+        <label>Senha</label>
+        <div class="pw-wrap">
+          <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres" />
+          <button class="pw-toggle" data-target="regPassword">👁</button>
+        </div>
+      </div>
+      <div class="auth-field">
+        <label>Confirmar senha</label>
+        <div class="pw-wrap">
+          <input type="password" id="regConfirm" placeholder="Repita a senha" />
+          <button class="pw-toggle" data-target="regConfirm">👁</button>
+        </div>
+      </div>
+      <p class="auth-error" id="regError"></p>
+      <button class="btn-auth" id="btnRegister">Criar conta</button>
+      <p class="auth-switch">Já tem conta? <button class="link-btn" id="goLogin">Entrar</button></p>
     </div>
   </div>
+</div>
 
-  <!-- ══════════════════════════════════════
-       APP
-  ══════════════════════════════════════ -->
-  <div class="app-wrapper hidden" id="appWrapper">
+<!-- ═══════════════════════════════════════
+     APP
+═══════════════════════════════════════ -->
+<div id="appScreen" class="app-screen" style="display:none">
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="logo">
-        <span class="logo-icon">◈</span>
-        <span class="logo-text">FinTrack</span>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo"><span class="logo-icon">◈</span><span class="logo-text">FinTrack</span></div>
+    <nav class="nav">
+      <button class="nav-btn active" data-tab="dashboard"><span class="nav-icon">▣</span><span>Dashboard</span></button>
+      <button class="nav-btn nav-despesas" data-tab="despesas"><span class="nav-icon">↓</span><span>Despesas</span></button>
+      <button class="nav-btn" data-tab="relatorio"><span class="nav-icon">◎</span><span>Relatório</span></button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <span class="user-avatar" id="sidebarAvatar">?</span>
+        <span class="user-name" id="sidebarName">—</span>
+      </div>
+      <button class="btn-sidelink" id="btnLogout">↪ Sair</button>
+      <button class="btn-sidelink" id="btnReset">↺ Resetar dados</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+        <p class="page-sub" id="pageSub">Visão geral das suas finanças</p>
+      </div>
+      <div class="month-nav">
+        <button class="month-btn" id="prevMonth">‹</button>
+        <span id="monthLabel">—</span>
+        <button class="month-btn" id="nextMonth">›</button>
+      </div>
+    </header>
+
+    <!-- ── DASHBOARD ── -->
+    <section class="tab" id="tab-dashboard">
+
+      <!-- TOP BALANCE STRIP -->
+      <div class="balance-strip">
+        <div class="balance-main">
+          <span class="balance-label">Saldo atual</span>
+          <span class="balance-value" id="balanceTop">R$ 0,00</span>
+        </div>
+        <div class="balance-pills">
+          <div class="b-pill b-pill--green">
+            <span class="b-pill-label">↑ Entrou</span>
+            <span class="b-pill-val" id="stripIn">R$ 0,00</span>
+          </div>
+          <div class="b-pill b-pill--red">
+            <span class="b-pill-label">↓ Saiu</span>
+            <span class="b-pill-val" id="stripOut">R$ 0,00</span>
+          </div>
+          <div class="b-pill b-pill--gold">
+            <span class="b-pill-label">🐷 Guardado</span>
+            <span class="b-pill-val" id="stripSaved">R$ 0,00</span>
+          </div>
+          <div class="b-pill b-pill--blue">
+            <span class="b-pill-label">📅 Previsão</span>
+            <span class="b-pill-val" id="stripForecast">R$ 0,00</span>
+          </div>
+        </div>
       </div>
 
-      <nav class="nav">
-        <button class="nav-btn active" data-tab="dashboard">
-          <span class="nav-icon">▣</span><span>Dashboard</span>
-        </button>
-        <button class="nav-btn nav-btn--danger" data-tab="despesas">
-          <span class="nav-icon">↓</span><span>Despesas</span>
-        </button>
-        <button class="nav-btn" data-tab="relatorio">
-          <span class="nav-icon">◎</span><span>Relatório</span>
-        </button>
-      </nav>
-
-      <div class="sidebar-footer">
-        <div class="user-info" id="sidebarUser">
-          <span class="user-avatar" id="userAvatar">?</span>
-          <span class="user-name" id="userName">—</span>
+      <!-- INCOME SETUP -->
+      <div class="card income-setup">
+        <div class="income-setup-hd">
+          <span class="card-title">💰 Cadastro de salário</span>
         </div>
-        <button class="btn-logout" id="btnLogout">↪ Sair</button>
-        <button class="btn-reset" id="btnReset">↺ Resetar dados</button>
+        <div class="income-types">
+          <button class="it-btn active" data-type="dia20">
+            <span class="it-icon">📅</span>
+            <span class="it-name">Dia 20</span>
+            <span class="it-desc">Salário fixo no dia 20</span>
+          </button>
+          <button class="it-btn" data-type="vale">
+            <span class="it-icon">🎫</span>
+            <span class="it-name">+ Vale</span>
+            <span class="it-desc">Salário + Vale alimentação</span>
+          </button>
+          <button class="it-btn" data-type="custom">
+            <span class="it-icon">🗓️</span>
+            <span class="it-name">Outra data</span>
+            <span class="it-desc">Escolha o dia de recebimento</span>
+          </button>
+        </div>
+        <div class="income-row">
+          <div class="field-sm">
+            <label id="mainIncomeLabel">Salário (R$)</label>
+            <div class="input-money"><span>R$</span><input type="number" id="incomeMain" placeholder="0,00" /></div>
+          </div>
+          <div class="field-sm" id="valeField" style="display:none">
+            <label>Vale (R$)</label>
+            <div class="input-money"><span>R$</span><input type="number" id="incomeVale" placeholder="0,00" /></div>
+          </div>
+          <div class="field-sm" id="customDayField" style="display:none">
+            <label>Dia de recebimento</label>
+            <input type="number" class="input-plain" id="incomeDay" placeholder="Ex: 5" min="1" max="31" />
+          </div>
+          <button class="btn-primary" id="btnSaveIncome">Salvar</button>
+        </div>
+        <div id="incomeBadges" class="income-badges"></div>
       </div>
-    </aside>
 
-    <!-- MAIN -->
-    <main class="main">
-
-      <!-- TOPBAR -->
-      <header class="topbar">
-        <div>
-          <h1 class="page-title" id="pageTitle">Dashboard</h1>
-          <p class="page-sub" id="pageSub">Visão geral das suas finanças</p>
-        </div>
-        <div class="month-selector">
-          <button class="month-btn" id="prevMonth">‹</button>
-          <span id="currentMonthLabel">—</span>
-          <button class="month-btn" id="nextMonth">›</button>
-        </div>
-      </header>
-
-      <!-- ── TAB: DASHBOARD ── -->
-      <section class="tab-content active" id="tab-dashboard">
-
-        <!-- INCOME SETUP -->
-        <div class="income-setup">
-          <div class="income-setup-header">
-            <span class="income-setup-title">💰 Cadastro de salário</span>
-            <span class="income-setup-sub">Como você recebe este mês?</span>
-          </div>
-          <div class="income-types">
-            <button class="income-type-btn active" data-type="dia20">
-              <span class="it-icon">📅</span>
-              <span class="it-label">Dia 20</span>
-              <span class="it-desc">Salário fixo no dia 20</span>
-            </button>
-            <button class="income-type-btn" data-type="vale">
-              <span class="it-icon">🎫</span>
-              <span class="it-label">Vale</span>
-              <span class="it-desc">Vale alimentação/refeição</span>
-            </button>
-            <button class="income-type-btn" data-type="custom">
-              <span class="it-icon">🗓️</span>
-              <span class="it-label">Outra data</span>
-              <span class="it-desc">Escolha o dia de recebimento</span>
-            </button>
-          </div>
-
-          <div class="income-form-row">
-            <div class="income-input-group">
-              <span class="income-input-label" id="incomeTypeLabel">Salário (dia 20)</span>
-              <div class="income-input-wrap">
-                <span class="currency-prefix">R$</span>
-                <input type="number" id="incomeInput" class="income-input" placeholder="0,00" min="0" step="0.01" />
-              </div>
-            </div>
-            <div class="income-input-group" id="customDateGroup" style="display:none">
-              <span class="income-input-label">Dia de recebimento</span>
-              <input type="number" id="customDay" class="day-input" placeholder="Ex: 5" min="1" max="31" />
-            </div>
-            <div class="income-input-group" id="valeValueGroup" style="display:none">
-              <span class="income-input-label">Vale alimentação / refeição (R$)</span>
-              <div class="income-input-wrap">
-                <span class="currency-prefix">R$</span>
-                <input type="number" id="valeInput" class="income-input" placeholder="0,00" min="0" step="0.01" />
-              </div>
-            </div>
-            <button class="btn-primary" id="btnSaveIncome">Salvar</button>
-          </div>
-
-          <!-- income summary badges -->
-          <div class="income-badges" id="incomeBadges"></div>
-        </div>
-
-        <!-- KPI CARDS -->
-        <div class="kpi-grid">
-          <div class="kpi-card kpi-income">
-            <p class="kpi-label">Renda total</p>
-            <p class="kpi-value" id="kpiIncome">R$ 0,00</p>
-            <p class="kpi-sub">este mês</p>
-          </div>
-          <div class="kpi-card kpi-expense">
-            <p class="kpi-label">Despesas</p>
-            <p class="kpi-value" id="kpiExpense">R$ 0,00</p>
-            <p class="kpi-sub">este mês</p>
-          </div>
-          <div class="kpi-card kpi-balance">
-            <p class="kpi-label">Saldo</p>
-            <p class="kpi-value" id="kpiBalance">R$ 0,00</p>
-            <p class="kpi-sub">disponível</p>
-          </div>
-          <div class="kpi-card kpi-save">
-            <p class="kpi-label">Taxa de Economia</p>
-            <p class="kpi-value" id="kpiSaveRate">0%</p>
-            <p class="kpi-sub">da renda</p>
+      <!-- META DE RESERVA -->
+      <div class="card reserve-card">
+        <div class="reserve-hd">
+          <span class="card-title">🎯 Meta de reserva</span>
+          <div class="reserve-inputs">
+            <div class="input-money input-money--sm"><span>R$</span><input type="number" id="goalAmount" placeholder="5.000,00" /></div>
+            <span class="reserve-sep">em</span>
+            <input type="number" class="input-plain input-plain--sm" id="goalMonths" placeholder="12" min="1" />
+            <span class="reserve-sep">meses</span>
+            <button class="btn-primary btn-sm" id="btnSaveGoal">Salvar</button>
           </div>
         </div>
+        <div class="progress-track"><div class="progress-bar" id="reserveBar"></div></div>
+        <div class="reserve-info">
+          <span id="reserveCaption">Defina sua meta acima.</span>
+          <span id="reservePct" class="reserve-pct">0%</span>
+        </div>
+        <!-- SAVINGS RATE -->
+        <div class="savings-mini">
+          <span>Meta mensal de economia:</span>
+          <div class="savings-inline">
+            <input type="number" id="goalPct" class="input-plain input-plain--xs" placeholder="20" min="0" max="100" />
+            <span>%</span>
+          </div>
+        </div>
+        <div class="progress-track progress-track--thin"><div class="progress-bar progress-bar--alt" id="savingsPctBar"></div></div>
+        <p class="progress-caption" id="savingsPctCaption"></p>
+      </div>
 
-        <!-- SAVINGS PROGRESS -->
-        <div class="savings-block">
-          <div class="savings-header">
-            <span class="savings-title">Meta de economia</span>
-            <div class="savings-goal-wrap">
-              <span class="savings-label">Meta:</span>
-              <input type="number" id="goalInput" class="goal-input" placeholder="20" min="0" max="100" />
-              <span>%</span>
+      <!-- CHARTS -->
+      <div class="charts-row">
+        <div class="card">
+          <p class="card-title">Gastos por categoria</p>
+          <div class="donut-wrap">
+            <canvas id="donutChart"></canvas>
+            <div class="donut-center">
+              <span class="donut-lbl">Total</span>
+              <span class="donut-val" id="donutTotal">R$ 0</span>
             </div>
           </div>
-          <div class="progress-track">
-            <div class="progress-bar" id="progressBar"></div>
-          </div>
-          <p class="progress-caption" id="progressCaption">Defina sua renda e meta para começar.</p>
         </div>
+        <div class="card card--wide">
+          <p class="card-title">Evolução mensal</p>
+          <canvas id="lineChart" height="190"></canvas>
+        </div>
+      </div>
 
-        <!-- CHARTS ROW -->
-        <div class="charts-row">
-          <div class="chart-card">
-            <p class="chart-title">Despesas por categoria</p>
-            <div class="chart-wrap">
-              <canvas id="donutChart"></canvas>
-              <div class="donut-center">
-                <span class="donut-total-label">Total</span>
-                <span class="donut-total-value" id="donutTotal">R$ 0</span>
-              </div>
-            </div>
-          </div>
-          <div class="chart-card chart-card--wide">
-            <p class="chart-title">Evolução mensal</p>
-            <canvas id="lineChart" height="200"></canvas>
+      <!-- DESPESAS TABLE -->
+      <div class="card">
+        <div class="table-hd">
+          <p class="card-title">Despesas do mês</p>
+          <div class="table-tags">
+            <span class="tag" id="dashCount">0 lançamentos</span>
+            <span class="tag tag--red" id="dashTotal">R$ 0,00</span>
           </div>
         </div>
-
-        <!-- EXPENSES TABLE ON DASHBOARD -->
-        <div class="dash-expenses-block">
-          <div class="dash-expenses-header">
-            <p class="chart-title">Despesas do mês</p>
-            <div class="dash-expenses-summary">
-              <span class="dash-exp-tag" id="dashExpCount">0 lançamentos</span>
-              <span class="dash-exp-tag dash-exp-tag--red" id="dashExpTotal">R$ 0,00</span>
-            </div>
-          </div>
-          <div class="dash-expenses-table-wrap">
-            <table class="expenses-table" id="dashExpTable">
-              <thead>
-                <tr>
-                  <th>Descrição</th>
-                  <th>Categoria</th>
-                  <th>Data</th>
-                  <th class="align-right">Valor</th>
-                </tr>
-              </thead>
-              <tbody id="dashExpTableBody">
-                <tr><td colspan="4" class="empty-state">Nenhuma despesa registrada.</td></tr>
-              </tbody>
-            </table>
-          </div>
+        <div class="table-wrap">
+          <table class="exp-table">
+            <thead><tr><th>Descrição</th><th>Categoria</th><th>Data</th><th class="ar">Valor</th></tr></thead>
+            <tbody id="dashTableBody"><tr><td colspan="4" class="empty">Nenhuma despesa.</td></tr></tbody>
+          </table>
         </div>
+      </div>
 
-      </section>
+    </section>
 
-      <!-- ── TAB: DESPESAS ── -->
-      <section class="tab-content" id="tab-despesas">
-
-        <div class="form-card">
-          <h2 class="form-title">Nova despesa</h2>
-          <div class="form-grid">
-            <div class="field">
-              <label>Descrição</label>
-              <input type="text" id="expDesc" placeholder="Ex: Aluguel, Mercado..." />
-            </div>
-            <div class="field">
-              <label>Valor (R$)</label>
-              <input type="number" id="expValue" placeholder="0,00" min="0" step="0.01" />
-            </div>
-            <div class="field">
-              <label>Categoria</label>
-              <select id="expCategory">
-                <option value="Moradia">🏠 Moradia</option>
-                <option value="Alimentação">🍽️ Alimentação</option>
-                <option value="Transporte">🚗 Transporte</option>
-                <option value="Saúde">❤️ Saúde</option>
-                <option value="Educação">📚 Educação</option>
-                <option value="Lazer">🎮 Lazer</option>
-                <option value="Roupas">👕 Roupas</option>
-                <option value="Outros">📦 Outros</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Data</label>
-              <input type="date" id="expDate" />
-            </div>
+    <!-- ── DESPESAS ── -->
+    <section class="tab" id="tab-despesas" style="display:none">
+      <div class="card">
+        <h2 class="card-title">Nova despesa</h2>
+        <div class="form-grid">
+          <div class="field"><label>Descrição</label><input type="text" id="expDesc" placeholder="Ex: Aluguel..." /></div>
+          <div class="field"><label>Valor (R$)</label><input type="number" id="expValue" placeholder="0,00" /></div>
+          <div class="field">
+            <label>Categoria</label>
+            <select id="expCat">
+              <option value="Moradia">🏠 Moradia</option>
+              <option value="Alimentação">🍽️ Alimentação</option>
+              <option value="Transporte">🚗 Transporte</option>
+              <option value="Saúde">❤️ Saúde</option>
+              <option value="Educação">📚 Educação</option>
+              <option value="Lazer">🎮 Lazer</option>
+              <option value="Roupas">👕 Roupas</option>
+              <option value="Outros">📦 Outros</option>
+            </select>
           </div>
-          <button class="btn-primary btn-full" id="btnAddExpense">+ Adicionar despesa</button>
+          <div class="field"><label>Data</label><input type="date" id="expDate" /></div>
         </div>
+        <button class="btn-primary btn-full" id="btnAdd">+ Adicionar despesa</button>
+      </div>
 
-        <div class="filter-bar">
-          <input type="text" id="searchInput" class="search-input" placeholder="🔍  Buscar despesa..." />
-          <select id="filterCategory" class="filter-select">
-            <option value="">Todas as categorias</option>
-            <option value="Moradia">Moradia</option>
-            <option value="Alimentação">Alimentação</option>
-            <option value="Transporte">Transporte</option>
-            <option value="Saúde">Saúde</option>
-            <option value="Educação">Educação</option>
-            <option value="Lazer">Lazer</option>
-            <option value="Roupas">Roupas</option>
-            <option value="Outros">Outros</option>
-          </select>
-        </div>
+      <div class="filter-bar">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Buscar..." />
+        <select id="filterCat" class="filter-select">
+          <option value="">Todas as categorias</option>
+          <option value="Moradia">Moradia</option>
+          <option value="Alimentação">Alimentação</option>
+          <option value="Transporte">Transporte</option>
+          <option value="Saúde">Saúde</option>
+          <option value="Educação">Educação</option>
+          <option value="Lazer">Lazer</option>
+          <option value="Roupas">Roupas</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
 
-        <ul class="expense-list expense-list--full" id="fullExpenseList">
-          <li class="empty-state">Nenhuma despesa registrada ainda.</li>
-        </ul>
+      <ul class="exp-list" id="fullList"><li class="empty">Nenhuma despesa ainda.</li></ul>
+    </section>
 
-      </section>
+    <!-- ── RELATÓRIO ── -->
+    <section class="tab" id="tab-relatorio" style="display:none">
+      <div class="report-grid">
+        <div class="card"><p class="report-lbl">Maior gasto</p><p class="report-val" id="rMax">—</p></div>
+        <div class="card"><p class="report-lbl">Gasto médio</p><p class="report-val" id="rAvg">—</p></div>
+        <div class="card"><p class="report-lbl">Lançamentos</p><p class="report-val" id="rCount">—</p></div>
+        <div class="card"><p class="report-lbl">Categoria líder</p><p class="report-val" id="rTop">—</p></div>
+      </div>
+      <div class="card" style="margin-top:1rem">
+        <p class="card-title">Ranking de categorias</p>
+        <canvas id="barChart" height="220"></canvas>
+      </div>
+      <div class="insight-card">
+        <p class="insight-title">💡 Análise inteligente</p>
+        <p id="insightText" class="insight-text">Adicione despesas para ver a análise.</p>
+      </div>
+    </section>
 
-      <!-- ── TAB: RELATÓRIO ── -->
-      <section class="tab-content" id="tab-relatorio">
+  </main>
+</div>
 
-        <div class="report-grid">
-          <div class="report-card">
-            <p class="report-label">Maior gasto</p>
-            <p class="report-value" id="reportMax">—</p>
-          </div>
-          <div class="report-card">
-            <p class="report-label">Gasto médio por despesa</p>
-            <p class="report-value" id="reportAvg">—</p>
-          </div>
-          <div class="report-card">
-            <p class="report-label">Total de lançamentos</p>
-            <p class="report-value" id="reportCount">—</p>
-          </div>
-          <div class="report-card">
-            <p class="report-label">Categoria líder</p>
-            <p class="report-value" id="reportTopCat">—</p>
-          </div>
-        </div>
-
-        <div class="chart-card" style="margin-top:1.5rem">
-          <p class="chart-title">Ranking de categorias</p>
-          <canvas id="barChart" height="220"></canvas>
-        </div>
-
-        <div class="insight-block">
-          <p class="insight-title">💡 Análise inteligente</p>
-          <p class="insight-text" id="insightText">Adicione suas despesas para receber uma análise.</p>
-        </div>
-
-      </section>
-
-    </main>
-  </div>
-
-  <!-- TOAST -->
-  <div class="toast" id="toast"></div>
-
-  <script src="script.js"></script>
+<div class="toast" id="toast"></div>
+<script src="script.js"></script>
 </body>
 </html>
