@@ -458,6 +458,34 @@
   </main>
 </div>
 
+<!-- ═══════ BOTTOM NAV (mobile only) ═══════ -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="bn-btn active" data-tab="dashboard">
+    <span class="bn-icon">▣</span><span>Dashboard</span>
+  </button>
+  <button class="bn-btn bn-btn--despesas" data-tab="despesas">
+    <span class="bn-icon">↓</span><span>Despesas</span>
+  </button>
+  <button class="bn-btn bn-btn--invest" data-tab="investimentos">
+    <span class="bn-icon">📈</span><span>Invest.</span>
+  </button>
+  <button class="bn-btn" data-tab="relatorio">
+    <span class="bn-icon">◎</span><span>Relatório</span>
+  </button>
+  <button class="bn-menu-btn" id="bnMenuBtn">
+    <div class="bn-avatar" id="bnAvatar">?</div>
+    <span>Menu</span>
+  </button>
+</nav>
+
+<!-- user drawer (mobile) -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<div class="user-drawer" id="userDrawer">
+  <div class="user-drawer-name" id="drawerName">—</div>
+  <button class="btn-sidelink" id="drawerLogout">↪ Sair</button>
+  <button class="btn-sidelink" id="drawerReset">↺ Resetar dados</button>
+</div>
+
 <div class="toast" id="toast"></div>
 <script src="script.js"></script>
 </body>

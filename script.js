@@ -166,6 +166,8 @@ function switchTab(tab){
   });
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.querySelector(`.nav-btn[data-tab="${tab}"]`)?.classList.add('active');
+  // sync bottom nav
+  document.querySelectorAll('.bn-btn[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
   const titles={
     dashboard:    ['Dashboard','Visão geral das suas finanças'],
     despesas:     ['Despesas','Registre e gerencie seus gastos'],
@@ -177,6 +179,7 @@ function switchTab(tab){
   if(tab==='relatorio')    renderReport();
   if(tab==='despesas')     renderFullList();
   if(tab==='investimentos') renderInvestments();
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 // ─── INCOME TYPE UI ───────────────────────────
@@ -632,6 +635,19 @@ function bindApp(){
     $('selicLabel').textContent=`${state.rates.selic}%`;
     saveState(); renderInvestments(); toast('✅ Taxas atualizadas!');
   };
+
+  // ── Bottom nav (mobile) ──
+  document.querySelectorAll('.bn-btn[data-tab]').forEach(btn=>{
+    btn.onclick=()=>{ if(btn.dataset.tab) switchTab(btn.dataset.tab); };
+  });
+
+  const drawerOverlay=$('drawerOverlay');
+  const userDrawer=$('userDrawer');
+  function closeDrawer(){ userDrawer.classList.remove('open'); drawerOverlay.classList.remove('open'); }
+  $('bnMenuBtn').onclick=()=>{ const open=userDrawer.classList.toggle('open'); drawerOverlay.classList.toggle('open',open); };
+  drawerOverlay.onclick=closeDrawer;
+  $('drawerLogout').onclick =()=>{ closeDrawer(); if(confirm('Deseja sair?')) logout(); };
+  $('drawerReset').onclick  =()=>{ closeDrawer(); if(!confirm('Apagar todos os dados financeiros?')) return; state={months:{},currentMonth:'',investments:[],rates:{cdi:10.50,selic:10.50}}; saveState(); setMonth(new Date()); toast('🗑️ Dados resetados.'); };
 }
 
 function addExpense(){
@@ -674,8 +690,12 @@ function addInvestment(){
 // ─── BOOT ─────────────────────────────────────
 function bootApp(){
   loadState(); showApp();
-  $('sidebarAvatar').textContent=user.name.charAt(0).toUpperCase();
-  $('sidebarName').textContent  =user.name;
+  const initial = user.name.charAt(0).toUpperCase();
+  $('sidebarAvatar').textContent = initial;
+  $('sidebarName').textContent   = user.name;
+  // bottom nav / drawer
+  if($('bnAvatar'))   $('bnAvatar').textContent   = initial;
+  if($('drawerName')) $('drawerName').textContent = user.name;
   ['incomeMain','incomeVoucher','incomeVoucherRefe','incomeDay','goalAmount','goalMonths','goalPct'].forEach(id=>{$(id).value='';});
   setIncomeType('dia20');
   $('expDate').value =new Date().toISOString().split('T')[0];
